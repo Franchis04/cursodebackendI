@@ -1,13 +1,13 @@
 [
-    {
-      "id" : 1,
-      "title": "Remera Nike",
-      "description": "Remera deportiva",
-      "code": "pgm232",
-      "price": 250,
-      "status": true,
-      "stock": 10,
-      "category": "remeras",
-      "thumbnail": ""
-    }
-  ]
+  {
+    "id" : 1,
+    "title": "Remera de Boca",
+    "description": "La camiseta que mas pesa en el mundo",
+    "code": "pjajjdd776",
+    "price": 40000,
+    "status": true,
+    "stock": 12,
+    "category": "remeras",
+    "thumbnail": ""
+  }
+]
