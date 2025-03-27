@@ -13,65 +13,73 @@ class ProductManager {
     } catch (error) {
       throw new Error(`Error al leer el archivo de productos: ${error.message}`);
     }
-  };
+  }
 
-  getProductById = async (id) => {
+  getProductById = async (idProduct) => {
     try {
-      const products = await this.getProducts();
-      const product = products.find(p => p.id === id);
-      return product || null;
+      const fileData = await fs.promises.readFile(this.pathFile, 'utf-8');
+      const data = JSON.parse(fileData);
+      const product = data.findIndex((prod) => prod.id === parseInt(idProduct));
+      if (!product) throw new Error(`Producto con id: ${idProduct} no encontrado`);
+
+      return product;
     } catch (error) {
-      throw new Error(`Error al obtener el producto por ID: ${error.message}`);
+      throw new Error(`Error al obtener el producto: ${error.message}`);
     }
-  };
+  }
 
-  addProduct = async (productData) => {
+  addProduct = async (newProduct) => {
     try {
-      const products = await this.getProducts();
-      const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
-      const newProduct = { id: newId, ...productData };
-      products.push(newProduct);
-      await fs.promises.writeFile(this.pathFile, JSON.stringify(products, null, 2));
-      return newProduct;
-    } catch (error) {
-      throw new Error(`Error al agregar el producto: ${error.message}`);
-    }
-  };
-
-  updateProduct = async (id, updatedData) => {
-    try {
-      const products = await this.getProducts();
-      const index = products.findIndex(p => p.id === id);
+      const fileData = await fs.promises.readFile(this.pathFile, 'utf-8');
+      const data = JSON.parse(fileData);
       
-      if (index === -1) {
-        return null;
-      }
+      newProduct.price = parseFloat(newProduct.price);
+      newProduct.stock = parseInt(newProduct.stock, 10);
 
-      const updatedProduct = { ...products[index], ...updatedData };
-      products[index] = updatedProduct;
-      await fs.promises.writeFile(this.pathFile, JSON.stringify(products, null, 2));
-      return updatedProduct;
+      const newId = data.length > 0 ? data[data.length - 1].id + 1 : 1;
+      const product = { id: newId, ...newProduct, status: true, thumbnail: "" }
+      data.push(product);
+
+      await fs.promises.writeFile(this.pathFile, JSON.stringify(data, null, 2), 'utf-8');
+      return product;
+    } catch (error) {
+      throw new Error(`Error añadir el producto: ${error.message}`);
+    }
+  }
+
+  setProductById = async (idProduct, updatedProduct) => {
+    try {
+      const fileData = await fs.promises.readFile(this.pathFile, 'utf-8');
+      const data = JSON.parse(fileData);
+      const productIndex = data.findIndex((prod) => prod.id === parseInt(idProduct));
+      if (productIndex === -1) throw new Error(`Producto con id: ${idProduct} no encontrado`);
+
+      data[productIndex] = { ...data[productIndex], ...updatedProduct };
+      await fs.promises.writeFile(this.pathFile, JSON.stringify(data, null, 2), 'utf-8');
+
+      return data;
     } catch (error) {
       throw new Error(`Error al actualizar el producto: ${error.message}`);
     }
-  };
+  }
 
-  deleteProduct = async (id) => {
+  deleteProductById = async(idProduct) => {
     try {
-      const products = await this.getProducts();
-      const index = products.findIndex(p => p.id === id);
-
-      if (index === -1) {
-        return null;
-      }
-
-      const [deletedProduct] = products.splice(index, 1);
-      await fs.promises.writeFile(this.pathFile, JSON.stringify(products, null, 2));
-      return deletedProduct;
+      const fileData = await fs.promises.readFile(this.pathFile, 'utf-8');
+      const data = JSON.parse(fileData);
+      const productIndex = data.findIndex((prod) => prod.id === parseInt(idProduct));
+  
+      if (productIndex === -1) throw new Error(`Producto con id: ${idProduct} no encontrado`);
+      data.splice(productIndex, 1);
+  
+      await fs.promises.writeFile(this.pathFile, JSON.stringify(data, null, 2), 'utf-8');
+  
+      return data;
     } catch (error) {
       throw new Error(`Error al eliminar el producto: ${error.message}`);
     }
-  };
+  }
+
 }
 
 export default ProductManager;

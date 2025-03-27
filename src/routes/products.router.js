@@ -2,9 +2,10 @@ import express from "express";
 import ProductManager from "../ProductManager.js";
 
 const productsRouter = express.Router();
+
 const productManager = new ProductManager("./src/data/products.json");
 
-productsRouter.get("/", async(req, res)=> {
+productsRouter.get("/", async (req, res) => {
   try {
     const data = await productManager.getProducts();
     res.status(200).send(data);
@@ -13,42 +14,42 @@ productsRouter.get("/", async(req, res)=> {
   }
 })
 
+productsRouter.get("/:pid", async (req, res) => {
+  try {
+    const products = await productManager.getProductById(req.params.pid);
+    res.status(200).send(products);
+  } catch (error) {
+    res.status(404).send({ message: error.message });
+  }
+});
+
 productsRouter.post("/", async (req, res) => {
   try {
-    const productData = req.body;
-    const newProduct = await productManager.addProduct(productData);
-    res.status(201).send(newProduct);
+    const newProduct = req.body;
+    const product = await productManager.addProduct(newProduct);
+    res.status(201).send(product);
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
 });
 
-productsRouter.put("/:id", async (req, res) => {
+productsRouter.put("/:pid", async (req, res) => {
   try {
-    const { id } = req.params;
-    const updatedData = req.body;
-    const updatedProduct = await productManager.updateProduct(id, updatedData);
-    if (!updatedProduct) {
-      return res.status(404).send({ message: "Producto no encontrado" });
-    }
-    res.status(200).send(updatedProduct);
+    const updatedProduct = req.body;
+    const products = await productManager.setProductById(req.params.pid, updatedProduct);
+    res.status(200).send(products);
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(404).send({ message: error.message });
   }
 });
 
-productsRouter.delete("/:id", async (req, res) => {
+productsRouter.delete("/:pid", async (req, res) => {
   try {
-    const { id } = req.params;
-    const deletedProduct = await productManager.deleteProduct(id);
-    if (!deletedProduct) {
-      return res.status(404).send({ message: "Producto no encontrado" });
-    }
-    res.status(200).send({ message: "Producto eliminado con éxito", deletedProduct });
+    await productManager.deleteProductById(req.params.pid);
+    res.status(200).send({ message: `Producto con id: ${req.params.pid} eliminado` });
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(404).send({ message: error.message });
   }
 });
-
 
 export default productsRouter;
