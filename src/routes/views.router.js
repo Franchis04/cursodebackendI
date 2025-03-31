@@ -1,26 +1,23 @@
 import express from "express";
-import ProductManager from "../ProductManager.js";
+import Post from "../model/post.model.js";
 
 const viewsRouter = express.Router();
-const productManager = new ProductManager("./src/data/products.json");
 
-viewsRouter.get("/", async(req, res)=> {
+viewsRouter.get("/", async(req, res) => {
   try {
-    const products = await productManager.getProducts();
-
-    res.render("home", { products }); 
+    const posts = await Post.find().lean();
+    res.render("home", { posts });
   } catch (error) {
-    res.status(500).send({ message: error.message });
+    res.status(500).send({ status: "error", message: error.message });
   }
-});
+})
 
-viewsRouter.get("/realtimeproducts", async(req, res)=> {
-  try {
-    const products = await productManager.getProducts();
-    res.render("realTimeProducts", { products });
-  } catch (error) {
-    res.status(500).send({ message: error.message });
-  }
-});
+viewsRouter.get("/register", (req, res)=> {
+  res.render("register");
+})
+
+viewsRouter.get("/post", (req, res)=> {
+  res.render("post");
+})
 
 export default viewsRouter;
